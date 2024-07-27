@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Planting Distance Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tree Planting <br> Distance Calculator</h1>
+        <form id="treeForm" onsubmit="event.preventDefault(); calculateTrees();">
+            <label for="treeType">Select Tree Type:</label>
+            <select id="treeType" onchange="updateSuggestedValues()">
+                <option value="Choose your tree">Choose your tree type</option>
+                <!-- Add more tree types here if needed -->
+            </select>
+            <div id="suggestedValues"></div>
+            <label for="unit">Select Unit:</label>
+            <select id="unit" onchange="updateUnitLabels()">
+                <option value="meters">Meters</option>
+                <option value="feet">Feet</option>
+            </select>
+            <label for="plantingShape">Select Planting Shape:</label>
+            <select id="plantingShape">
+                <option value="chess">Chess Table</option>
+                <option value="diagonal">Diagonal</option>
+            </select>
+            <label for="distanceX">Enter Distance Between Trees (X):</label>
+            <input type="number" id="distanceX" required>
+            <label for="distanceY">Enter Distance Between Trees (Y):</label>
+            <input type="number" id="distanceY" required>
+            <label for="landWidth">Enter Land Width:</label>
+            <input type="number" id="landWidth" required>
+            <label for="landHeight">Enter Land Height:</label>
+            <input type="number" id="landHeight" required>
+            <button type="submit">Calculate</button>
+        </form>
+        <div id="result"></div>
+        <canvas id="fieldCanvas"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
