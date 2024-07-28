@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Planting Distance Calculator</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            background-color: rgb(165, 255, 165);
+            border: 1px solid rgb(102, 102, 102); /* Thin black border */
+            padding: 10px;
+        }
+        .form-group {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .form-group input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .form-group .radio-group {
+            display: flex;
+            flex-direction: column;
+        }
+        #calculate {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+            margin-top: 20px;
+        }
+        #result {
+    margin-top: 25px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 22px; /* Adjust the font size as needed */
+    background-color: yellow; /* Add a yellow background */
+}
+        #specialcomment{
+            width: 100%;
+            max-width: 600px;
+            height: 200px;
+            margin: 20px 0;
+            border: 2px solid #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .tree {
+            width: 20px;
+            height: 20px;
+            background-color: green;
+            border-radius: 50%;
+            position: absolute;
+        }
+        #suggestedValues {
+    text-align: center;
+    background-color: lightblue;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 0px;
+    border: 2px solid #000;
+}
+    
+    </style>
+</head>
+<body>
+    <h1>Tree Planting <br> Distance Calculator</h1>
+    <div class="form-group">
+        <label for="treeType">Choose Tree Type</label>
+        <select id="treeType" onchange="updateSuggestedValues()">
+            <option>Choose your tree type</option>
+        </select>
+    </div>
+    <div id="suggestedValues" class="form-group"></div>
+    <div class="form-group">
+        <label for="unit">Choose Unit</label>
+        <select id="unit" onchange="updateLandSize()">
+            <option value="meters">Meters</option>
+            <option value="feet">Feet</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Select Planting Style/System</label>
+        <div class="radio-group">
+            <label><input type="radio" name="plantingStyle" value="Square" checked> Square</label>
+            <label><input type="radio" name="plantingStyle" value="Rectangular"> Rectangular</label>
+            <label><input type="radio" name="plantingStyle" value="Hexagonal"> Hexagonal/Diagonal/Triangular</label>
+            <label><input type="radio" name="plantingStyle" value="Quincunx"> Quincunx</label>
+            <label><input type="radio" name="plantingStyle" value="Contour"> Contour</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="distanceX">Enter Distance Between Trees (X)</label>
+        <input type="number" id="distanceX">
+    </div>
+    <div class="form-group">
+        <label for="distanceY">Enter Distance Between Trees (Y)</label>
+        <input type="number" id="distanceY">
+    </div>
+    <div class="form-group">
+        <label for="landWidth">Enter Land Width</label>
+        <input type="number" id="landWidth" oninput="updateLandSize()">
+    </div>
+    <div class="form-group">
+        <label for="landHeight">Enter Land Height</label>
+        <input type="number" id="landHeight" oninput="updateLandSize()">
+    </div>
+    <div id="landSize" class="form-group"></div>
+    <button id="calculate" onclick="calculateTrees()">Calculate</button>
+    <div id="result"></div>
+    <div id="specialcomment"></div>
+
+    <script>
+        const treeData = [
+            {"tree_type": "Paulownia", "firewood": "2x2", "industrial": "4x4"},
+            {"tree_type": "Apple", "fruit": "5x5", "firewood": "3x3"},
+            {"tree_type": "Pine", "firewood": "2.5x2.5", "industrial": "3.5x3.5"},
+            {"tree_type": "Oak", "firewood": "3x3", "industrial": "5x5"},
+            {"tree_type": "Maple", "firewood": "2.5x2.5", "industrial": "4x4"},
+            {"tree_type": "Cherry", "fruit": "4x4", "firewood": "3x3"},
+            {"tree_type": "Plum", "fruit": "5x5", "firewood": "3x3"},
+            {"tree_type": "Walnut", "fruit": "6x6", "firewood": "4x4"},
+            {"tree_type": "Chestnut", "fruit": "5x5", "firewood": "3x3"},
+            {"tree_type": "Beech", "firewood": "3x3", "industrial": "4.5x4.5"},
+            {"tree_type": "Birch", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Cedar", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Cypress", "firewood": "2.5x2.5", "industrial": "3.5x3.5"},
+            {"tree_type": "Douglas Fir", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Elm", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Eucalyptus", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Hickory", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Holly", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Juniper", "firewood": "2.5x2.5", "industrial": "3.5x3.5"},
+            {"tree_type": "Larch", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Lime", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Magnolia", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Mulberry", "fruit": "4x4", "firewood": "3x3"},
+            {"tree_type": "Orange", "fruit": "5x5", "firewood": "3x3"},
+            {"tree_type": "Peach", "fruit": "4x4", "firewood": "3x3"},
+            {"tree_type": "Pecan", "fruit": "6x6", "firewood": "4x4"},
+            {"tree_type": "Pear", "fruit": "5x5", "firewood": "3x3"},
+            {"tree_type": "Pineapple", "fruit": "1x1", "firewood": "2x2"},
+            {"tree_type": "Poplar", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Redwood", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Sequoia", "firewood": "4x4", "industrial": "5x5"},
+            {"tree_type": "Spruce", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Sycamore", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Tamarind", "fruit": "4x4", "firewood": "3x3"},
+            {"tree_type": "Teak", "firewood": "3x3", "industrial": "4x4"},
+            {"tree_type": "Walnut", "fruit": "6x6", "firewood": "4x4"},
+            {"tree_type": "Willow", "firewood": "2x2", "industrial": "3x3"},
+            {"tree_type": "Yew", "firewood": "2.5x2.5", "industrial": "3.5x3.5"}
+        ];
+
+        function populateTreeTypes() {
+            const treeTypeSelect = document.getElementById('treeType');
+            treeData.forEach(tree => {
+                const option = document.createElement('option');
+                option.value = tree.tree_type;
+                option.text = tree.tree_type;
+                treeTypeSelect.appendChild(option);
+            });
+        }
+
+        function updateSuggestedValues() {
+            const treeType = document.getElementById('treeType').value;
+            const suggestedValuesDiv = document.getElementById('suggestedValues');
+            suggestedValuesDiv.innerHTML = '';
+
+            const tree = treeData.find(tree => tree.tree_type === treeType);
+            if (tree) {
+                const firewood = tree.firewood || 'N/A';
+                const fruit = tree.fruit || 'N/A';
+                const industrial = tree.industrial || 'N/A';
+
+                suggestedValuesDiv.innerHTML = `
+                    <p><strong>Suggested Planting Distances:</strong></p>
+                    <p>=> Firewood: ${firewood}</p>
+                    <p>=> Fruit: ${fruit}</p>
+                    <p>=> Industrial wood: ${industrial}</p>
+                `;
+            }
+        }
+
+        function updateLandSize() {
+            const landWidth = parseFloat(document.getElementById('landWidth').value);
+            const landHeight = parseFloat(document.getElementById('landHeight').value);
+            const unit = document.getElementById('unit').value;
+            const landSizeDiv = document.getElementById('landSize');
+
+            if (!isNaN(landWidth) && !isNaN(landHeight)) {
+                let landSizeText = `Land Size: ${landWidth} x ${landHeight} ${unit}`;
+                let area = landWidth * landHeight;
+
+                if (unit === 'meters') {
+                    landSizeText += ` = ${area.toFixed(2)} m²`;
+                    if (area >= 10000) {
+                        landSizeText += ` = ${(area / 10000).toFixed(2)} hectares`;
+                    }
+                } else {
+                    landSizeText += ` = ${area.toFixed(2)} ft²`;
+                }
+
+                landSizeDiv.innerHTML = landSizeText;
+            } else {
+                landSizeDiv.innerHTML = '';
+            }
+        }
+
+        function calculateTrees() {
+    const distanceX = parseFloat(document.getElementById('distanceX').value);
+    const distanceY = parseFloat(document.getElementById('distanceY').value);
+    const landWidth = parseFloat(document.getElementById('landWidth').value);
+    const landHeight = parseFloat(document.getElementById('landHeight').value);
+    const plantingStyle = document.querySelector('input[name="plantingStyle"]:checked').value;
+
+    if (!distanceX || !distanceY || !landWidth || !landHeight) {
+        document.getElementById('result').innerText = 'Please fill in all fields.';
+        return;
+    }
+
+    let totalTrees = 0;
+    const numTreesX = Math.floor(landWidth / distanceX) + 1;
+    const numTreesY = Math.floor(landHeight / distanceY) + 1;
+
+    switch (plantingStyle) {
+        case 'Square':
+            if (distanceX !== distanceY) {
+                document.getElementById('result').innerText = 'In Square style, both distances must be the same.';
+                return;
+            }
+            totalTrees = numTreesX * numTreesY;
+            break;
+
+        case 'Rectangular':
+            totalTrees = numTreesX * numTreesY;
+            break;
+
+        case 'Diagonal':
+        case 'Hexagonal':
+            if (distanceX !== distanceY) {
+                document.getElementById('result').innerText = 'In Diagonal/Hexagonal style, both distances must be the same.';
+                return;
+            }
+            totalTrees = Math.floor((numTreesX * numTreesY) * 1.15);
+            break;
+
+        case 'Quincunx':
+            if (distanceX !== distanceY) {
+                document.getElementById('result').innerText = 'In Quincunx style, both distances must be the same.';
+                return;
+            }
+            // Calculate trees in the square grid
+            const treesInSquares = numTreesX * numTreesY;
+            // Calculate additional trees in the center of each square
+            const additionalTrees = (numTreesX - 1) * (numTreesY - 1);
+            totalTrees = treesInSquares + additionalTrees;
+            break;
+
+        case 'Contour':
+            totalTrees = numTreesX * numTreesY; // Assuming the basic calculation for Contour style
+            break;
+
+        default:
+            document.getElementById('result').innerText = 'Invalid planting style selected.';
+            return;
+    }
+
+    document.getElementById('result').innerText = `Total trees that can be planted: ${totalTrees}`;
+    checkSpecialComment();
+}
+
+function checkSpecialComment() {
+    const distanceX = parseFloat(document.getElementById('distanceX').value);
+    const distanceY = parseFloat(document.getElementById('distanceY').value);
+    const landWidth = parseFloat(document.getElementById('landWidth').value);
+    const landHeight = parseFloat(document.getElementById('landHeight').value);
+    const plantingStyle = document.querySelector('input[name="plantingStyle"]:checked').value;
+
+    const specialCommentDiv = document.getElementById('specialcomment');
+    specialCommentDiv.innerHTML = ''; // Clear previous comments
+
+    if (plantingStyle === 'Hexagonal' && distanceX === distanceY && landWidth === landHeight && distanceX === landWidth) {
+        specialCommentDiv.innerHTML = 'With a hexagonal planting style where all distances and land dimensions are equal, special considerations are needed. Technically, four trees could be planted, but this assumes the land is diamond-shaped (or rhombus). Since your land is likely square-shaped, only <b>3</b> trees can fit using this method.';
+    }
+}
+
+        window.onload = function() {
+            populateTreeTypes();
+        }
+    </script>
+</body>
+</html>
